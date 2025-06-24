@@ -9,10 +9,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "mirama-prod-infrastructure"
-    key     = "state/ecr/terraform.tfstate"
-    region  = "eu-west-1"
-    encrypt = true
+    bucket         = "mirama-infra"
+    key            = "prod/repository/terraform.tfstate"
+    region         = "eu-west-1"
+    encrypt        = true
   }
 }
 
@@ -20,7 +20,7 @@ provider "aws" {
   region = "eu-west-1"
   default_tags {
     tags = {
-      environment      = "production"
+      environment      = "prod"
       application-name = "mirama"
     }
   }

@@ -1,0 +1,9 @@
+module "rds" {
+  source = "../../../modules/rds"
+
+  environment = "prod"
+  vpc_id       = data.terraform_remote_state.network.outputs.vpc_id
+  vpc_cidr     = data.terraform_remote_state.network.outputs.vpc_cidr_block
+  rds_subnet_id   = data.terraform_remote_state.network.outputs.private_rds_subnet_id
+
+}
