@@ -15,3 +15,12 @@ data "terraform_remote_state" "ecr" {
     key    = "prod/repository/terraform.tfstate"
   }
 }
+
+data "terraform_remote_state" "iam" {
+  backend = "s3"
+  config = {
+    bucket = "mirama-infra"
+    region = "eu-west-1"
+    key    = "prod/iam/terraform.tfstate"
+  }
+}

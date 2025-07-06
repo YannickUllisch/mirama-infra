@@ -17,3 +17,18 @@ variable "environment" {
   description = "The environment for which the repository is being created (e.g., dev, staging, prod)."
   type        = string
 }
+
+variable "ecs_instance_profile_arn" {
+  description = "ARN of the ECS instance profile to use for the ECS tasks"
+  type        = string
+}
+
+variable "ecs_task_role_arn" {
+  description = "ARN of the ECS task role to use for the ECS tasks"
+  type        = string
+}
+
+variable "ecs_exec_role_arn" {
+  description = "ARN of the ECS exec role to use for the ECS tasks"
+  type        = string
+}

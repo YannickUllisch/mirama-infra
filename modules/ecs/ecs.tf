@@ -1,4 +1,4 @@
-resource "aws_ecs_cluster" "nextjs_cluster" {
+resource "aws_ecs_cluster" "ecs_cluster" {
   name = "mirama-${var.environment}-ecs-cluster"
 }
 
@@ -7,6 +7,7 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = var.vpc_id
   description = "Allow HTTP for NextJS app"
 
+  // Allow HTTP traffic on port 80
   ingress {
     from_port   = 80
     to_port     = 80
@@ -22,3 +23,108 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
+data "aws_ssm_parameter" "ecs_node_ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
+}
+
+resource "aws_launch_template" "ecs_lt" {
+  name_prefix   = "mirama-ecs-${var.environment}-"
+  image_id      = data.aws_ssm_parameter.ecs_node_ami.value
+  instance_type = "t2.micro"
+
+  monitoring {
+    enabled = true
+  }
+
+  iam_instance_profile {
+    arn = var.ecs_instance_profile_arn
+  }
+
+  user_data = base64encode(<<EOF
+#!/bin/bash
+echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.name} >> /etc/ecs/ecs.config
+EOF
+  )
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.ecs_sg.id]
+    subnet_id                   = var.public_subnet_id
+    
+  }
+}
+
+resource "aws_autoscaling_group" "ecs_asg" {
+  name_prefix = "mirama-ecs-asg-${var.environment}-"
+  desired_capacity     = 1
+  max_size             = 1
+  min_size             = 1
+  vpc_zone_identifier  = [var.public_subnet_id]
+  health_check_grace_period = 300
+  health_check_type   = "EC2"
+
+
+  launch_template {
+    id      = aws_launch_template.ecs_lt.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = ""
+    propagate_at_launch = true
+  }
+}
+
+
+resource "aws_ecs_task_definition" "mirama_app_task" {
+  family                   = "mirama-nextjs-task"
+  requires_compatibilities = ["EC2"]
+  execution_role_arn = var.ecs_exec_role_arn
+  task_role_arn      = var.ecs_task_role_arn
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  
+
+  container_definitions = jsonencode([
+    {
+      name      = "mirama-app"
+      image     = "${var.ecr_repo_url}:latest"
+      essential = true
+      
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_log_group.name
+          "awslogs-region"        = "eu-west-1"
+          "awslogs-stream-prefix" = "mirama-ecs"
+        }
+      }
+    }
+  ])
+}
+
+
+resource "aws_ecs_service" "ecs" {
+  name            = "nextjs-service"
+  cluster         = aws_ecs_cluster.ecs_cluster.id
+  task_definition = aws_ecs_task_definition.mirama_app_task.arn
+  launch_type     = "EC2"
+  desired_count   = 1
+
+  network_configuration {
+    subnets          = [var.public_subnet_id]
+    security_groups  = [aws_security_group.ecs_sg.id]
+  }
+
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
+}
