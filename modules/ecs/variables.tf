@@ -3,9 +3,9 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "public_subnet_id" {
-  description = "ID of Public subnet to deploy ECS tasks"
-  type        = string
+variable "public_subnet_ids" {
+  description = "IDs of two the public subnets in the VPC"
+  type        = list(string)
 }
 
 variable "ecr_repo_url" {
@@ -30,5 +30,15 @@ variable "ecs_task_role_arn" {
 
 variable "ecs_exec_role_arn" {
   description = "ARN of the ECS exec role to use for the ECS tasks"
+  type        = string
+}
+
+variable "sub_domain" {
+  description = "Subdomain name for the ECS service, with root being yannickullisch.com"
+  type        = string
+}
+
+variable "domain_name" {
+  description = "Domain name for the ECS service, e.g., yannickullisch.com"
   type        = string
 }

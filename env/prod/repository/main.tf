@@ -1,4 +1,4 @@
 module "ecr" {
-  source = "../../../modules/repository"
+  source      = "../../../modules/repository"
   environment = "prod"
 }

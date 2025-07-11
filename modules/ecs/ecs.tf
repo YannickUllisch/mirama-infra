@@ -9,10 +9,10 @@ resource "aws_security_group" "ecs_sg" {
 
   // Allow HTTP traffic on port 3000
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
   }
 
   egress {
@@ -49,20 +49,22 @@ EOF
   network_interfaces {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.ecs_sg.id]
-    subnet_id                   = var.public_subnet_id
-    
+    subnet_id                   = var.public_subnet_ids[0]
   }
 }
 
 resource "aws_autoscaling_group" "ecs_asg" {
-  name_prefix = "mirama-ecs-asg-${var.environment}-"
-  desired_capacity     = 1
-  max_size             = 1
-  min_size             = 1
-  vpc_zone_identifier  = [var.public_subnet_id]
+  name_prefix               = "mirama-ecs-asg-${var.environment}-"
+  desired_capacity          = 1
+  max_size                  = 1
+  min_size                  = 1
+  vpc_zone_identifier       = var.public_subnet_ids
   health_check_grace_period = 300
-  health_check_type   = "EC2"
+  health_check_type         = "EC2"
 
+  lifecycle {
+    ignore_changes = [load_balancers, target_group_arns]
+  }
 
   launch_template {
     id      = aws_launch_template.ecs_lt.id
@@ -80,19 +82,19 @@ resource "aws_autoscaling_group" "ecs_asg" {
 resource "aws_ecs_task_definition" "mirama_app_task" {
   family                   = "mirama-nextjs-task"
   requires_compatibilities = ["EC2"]
-  execution_role_arn = var.ecs_exec_role_arn
-  task_role_arn      = var.ecs_task_role_arn
+  execution_role_arn       = var.ecs_exec_role_arn
+  task_role_arn            = var.ecs_task_role_arn
   network_mode             = "awsvpc"
   cpu                      = "256"
   memory                   = "512"
-  
+
 
   container_definitions = jsonencode([
     {
       name      = "mirama-app"
       image     = "${var.ecr_repo_url}:latest"
       essential = true
-      
+
       portMappings = [
         {
           containerPort = 3000
@@ -100,14 +102,14 @@ resource "aws_ecs_task_definition" "mirama_app_task" {
         }
       ]
 
-      secrets = [
+      environment = [
         {
           name  = "NEXT_PUBLIC_ENV"
           value = "prod"
         },
         {
           name  = "AUTH_TRUST_HOST"
-          value = true
+          value = "true"
         },
         {
           name  = "BASE_URL"
@@ -144,10 +146,21 @@ resource "aws_ecs_service" "ecs" {
   desired_count   = 1
 
   network_configuration {
-    subnets          = [var.public_subnet_id]
-    security_groups  = [aws_security_group.ecs_sg.id]
-    assign_public_ip = true
+    subnets         = var.public_subnet_ids
+    security_groups = [aws_security_group.ecs_sg.id]
   }
+
+  depends_on = [
+    aws_alb_listener.https_listener,
+    aws_alb_listener.http_listener,
+  ]
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.app_alb_tg.arn
+    container_name   = "mirama-app"
+    container_port   = 3000
+  }
+
 
   deployment_minimum_healthy_percent = 0
   deployment_maximum_percent         = 100

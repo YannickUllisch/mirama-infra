@@ -9,10 +9,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "mirama-infra"
-    key            = "prod/ecs/terraform.tfstate"
-    region         = "eu-west-1"
-    encrypt        = true
+    bucket  = "mirama-infra"
+    key     = "prod/ecs/terraform.tfstate"
+    region  = "eu-west-1"
+    encrypt = true
   }
 }
 
