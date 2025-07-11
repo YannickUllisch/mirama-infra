@@ -7,10 +7,10 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = var.vpc_id
   description = "Allow HTTP for NextJS app"
 
-  // Allow HTTP traffic on port 80
+  // Allow HTTP traffic on port 3000
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -95,8 +95,31 @@ resource "aws_ecs_task_definition" "mirama_app_task" {
       
       portMappings = [
         {
-          containerPort = 80
-          hostPort      = 80
+          containerPort = 3000
+          hostPort      = 3000
+        }
+      ]
+
+      secrets = [
+        {
+          name  = "NEXT_PUBLIC_ENV"
+          value = "prod"
+        },
+        {
+          name  = "AUTH_TRUST_HOST"
+          value = true
+        },
+        {
+          name  = "BASE_URL"
+          value = "https://mirama.dk"
+        },
+        {
+          name  = "NEXTAUTH_URL"
+          value = "https://mirama.dk"
+        },
+        {
+          name  = "RESEND_EMAIL_FROM"
+          value = "onboarding@resend.dev"
         }
       ]
 
@@ -123,6 +146,7 @@ resource "aws_ecs_service" "ecs" {
   network_configuration {
     subnets          = [var.public_subnet_id]
     security_groups  = [aws_security_group.ecs_sg.id]
+    assign_public_ip = true
   }
 
   deployment_minimum_healthy_percent = 0
