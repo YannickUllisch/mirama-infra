@@ -35,7 +35,7 @@ resource "aws_alb" "main" {
 # ALB Listener for HTTP
 resource "aws_alb_target_group" "app_alb_tg" {
   name        = "mirama-${var.environment}-ecs-alb-target-group"
-  port        = 3000
+  port        = var.container_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
@@ -47,7 +47,7 @@ resource "aws_alb_target_group" "app_alb_tg" {
   health_check {
     enabled             = true
     path                = "/api/health"
-    port                = 3000
+    port                = var.container_port
     interval            = 240
   }
 }

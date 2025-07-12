@@ -9,8 +9,8 @@ resource "aws_security_group" "ecs_sg" {
 
   // Allow HTTP traffic on port 3000
   ingress {
-    from_port       = 3000
-    to_port         = 3000
+    from_port       = var.container_port
+    to_port         = var.container_port
     protocol        = "tcp"
     security_groups = [aws_security_group.alb_sg.id]
   }
@@ -87,18 +87,18 @@ resource "aws_ecs_task_definition" "mirama_app_task" {
   network_mode             = "awsvpc"
   cpu                      = "256"
   memory                   = "512"
-
+  
 
   container_definitions = jsonencode([
     {
-      name      = "mirama-app"
+      name      = "${var.container_name}"
       image     = "${var.ecr_repo_url}:latest"
       essential = true
 
       portMappings = [
         {
-          containerPort = 3000
-          hostPort      = 3000
+          containerPort = "${var.container_port}"
+          hostPort      = "${var.container_port}"
         }
       ]
 
@@ -110,14 +110,6 @@ resource "aws_ecs_task_definition" "mirama_app_task" {
         {
           name  = "AUTH_TRUST_HOST"
           value = "true"
-        },
-        {
-          name  = "BASE_URL"
-          value = "https://mirama.dk"
-        },
-        {
-          name  = "NEXTAUTH_URL"
-          value = "https://mirama.dk"
         },
         {
           name  = "RESEND_EMAIL_FROM"
@@ -139,7 +131,7 @@ resource "aws_ecs_task_definition" "mirama_app_task" {
 
 
 resource "aws_ecs_service" "ecs" {
-  name            = "nextjs-service"
+  name            = "mirama-ecs-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.mirama_app_task.arn
   launch_type     = "EC2"
@@ -157,10 +149,9 @@ resource "aws_ecs_service" "ecs" {
 
   load_balancer {
     target_group_arn = aws_alb_target_group.app_alb_tg.arn
-    container_name   = "mirama-app"
-    container_port   = 3000
+    container_name   = var.container_name
+    container_port   = var.container_port
   }
-
 
   deployment_minimum_healthy_percent = 0
   deployment_maximum_percent         = 100

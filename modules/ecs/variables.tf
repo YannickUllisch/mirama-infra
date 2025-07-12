@@ -42,3 +42,15 @@ variable "domain_name" {
   description = "Domain name for the ECS service, e.g., yannickullisch.com"
   type        = string
 }
+
+variable "container_name" {
+  description = "Name of the container in the ECS task definition"
+  type        = string
+  default     = "mirama-app"
+}
+
+variable "container_port" {
+  description = "Exposed port of the container in the ECS task definition"
+  type        = number
+  default     = 3000
+}
