@@ -16,10 +16,10 @@ resource "aws_ecr_lifecycle_policy" "remove_untagged" {
         rulePriority = 2
         description  = "Remove untagged images after a day"
         selection = {
-          tagStatus     = "untagged"
-          countType     = "sinceImagePushed"
-          countUnit     = "days"
-          countNumber   = 1
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 1
         }
         action = {
           type = "expire"

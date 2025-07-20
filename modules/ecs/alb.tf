@@ -45,10 +45,10 @@ resource "aws_alb_target_group" "app_alb_tg" {
   }
 
   health_check {
-    enabled             = true
-    path                = "/api/health"
-    port                = var.container_port
-    interval            = 240
+    enabled  = true
+    path     = "/api/health"
+    port     = var.container_port
+    interval = 240
   }
 }
 
@@ -66,14 +66,14 @@ resource "aws_alb_listener" "http_listener" {
 # ALB Listener for HTTPS
 resource "aws_alb_listener" "https_listener" {
   load_balancer_arn = aws_alb.main.arn
-  port = "443"
-  protocol = "HTTPS"
+  port              = "443"
+  protocol          = "HTTPS"
 
-  ssl_policy = "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
+  ssl_policy      = "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
   certificate_arn = aws_acm_certificate.main.arn
 
   default_action {
     target_group_arn = aws_alb_target_group.app_alb_tg.arn
-    type = "forward"
+    type             = "forward"
   }
 }
