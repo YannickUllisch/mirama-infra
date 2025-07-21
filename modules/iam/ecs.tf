@@ -24,7 +24,6 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
   role = aws_iam_role.ecs_instance_role.name
 }
 
-
 # ECS Task Role
 data "aws_iam_policy_document" "ecs_task_doc" {
   statement {

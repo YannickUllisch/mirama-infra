@@ -6,3 +6,5 @@ data "terraform_remote_state" "network" {
     key    = "prod/network/terraform.tfstate"
   }
 }
+
+data "aws_caller_identity" "current" {}

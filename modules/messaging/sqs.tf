@@ -1,6 +1,24 @@
 resource "aws_sqs_queue" "notification_sqs" {
-  name = "notification-sqs"
-  fifo_queue = true
+  name = "mirama-notification-queue-${var.environment}"
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.deadletter_queue.arn
+    maxReceiveCount     = 3
+  })
+}
+
+resource "aws_sqs_queue" "deadletter_queue" {
+  name = "mirama-deadletter-queue-${var.environment}"
+}
+
+# Allows the notification queue to send messages to the DQL
+resource "aws_sqs_queue_redrive_allow_policy" "terraform_queue_redrive_allow_policy" {
+  queue_url = aws_sqs_queue.deadletter_queue.id
+
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue",
+    sourceQueueArns   = [aws_sqs_queue.notification_sqs.arn]
+  })
 }
 
 resource "aws_sns_topic_subscription" "notification_sqs_target" {
@@ -9,27 +27,26 @@ resource "aws_sns_topic_subscription" "notification_sqs_target" {
   endpoint  = aws_sqs_queue.notification_sqs.arn
 }
 
-resource "aws_sqs_queue_policy" "results_updates_queue_policy" {
-    queue_url = "${aws_sqs_queue.notification_sqs.id}"
+# Allow only SNS topic to send messages to the SQS queue
+resource "aws_sqs_queue_policy" "notification_sqs_policy" {
+  queue_url = aws_sqs_queue.notification_sqs.id
 
-    policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Id": "sqspolicy",
-  "Statement": [
-    {
-      "Sid": "First",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": "sqs:SendMessage",
-      "Resource": "${aws_sqs_queue.notification_sqs.arn}",
-      "Condition": {
-        "ArnEquals": {
-          "aws:SourceArn": "${aws_sns_topic.notification_sns.arn}"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          AWS = "*"
+        },
+        Action = "SQS:SendMessage",
+        Resource = aws_sqs_queue.notification_sqs.arn,
+        Condition = {
+          ArnEquals = {
+            "aws:SourceArn" = aws_sns_topic.notification_sns.arn
+          }
         }
       }
-    }
-  ]
-}
-POLICY
+    ]
+  })
 }
