@@ -39,7 +39,7 @@ resource "aws_sqs_queue_policy" "notification_sqs_policy" {
         Principal = {
           AWS = "*"
         },
-        Action = "SQS:SendMessage",
+        Action   = "SQS:SendMessage",
         Resource = aws_sqs_queue.notification_sqs.arn,
         Condition = {
           ArnEquals = {
