@@ -41,17 +41,6 @@ resource "aws_cognito_user_pool" "pool" {
     }
   }
 
-  schema {
-    attribute_data_type = "String"
-    name                = "name"
-    required            = true
-    mutable             = true
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 2048
-    }
-  }
-
   account_recovery_setting {
     recovery_mechanism {
       name     = "verified_email"
