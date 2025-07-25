@@ -8,6 +8,7 @@ terraform {
     }
   }
 
+
   backend "s3" {
     bucket  = "mirama-infra"
     key     = "prod/cognito/terraform.tfstate"
@@ -18,6 +19,7 @@ terraform {
 
 provider "aws" {
   region = "eu-west-1"
+
   default_tags {
     tags = {
       environment      = "prod"

@@ -1,7 +1,7 @@
 resource "aws_cognito_user_pool" "pool" {
   // General configuration
-  name                = "mirama-${var.environment}-user-pool"
-  username_attributes = ["email"]
+  name                     = "mirama-${var.environment}-user-pool"
+  username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
   username_configuration {
@@ -13,10 +13,11 @@ resource "aws_cognito_user_pool" "pool" {
     require_uppercase = true
     require_symbols   = true
   }
-  # Testing with public sign up access, but might change back to private later.
-  #   admin_create_user_config {
-  #     allow_admin_create_user_only = true
-  #   }
+
+  // Don't allow public sign ups, we handle sign up logic in our app manually through the AWS API
+  admin_create_user_config {
+    allow_admin_create_user_only = true
+  }
 
   // MFA Setup
   mfa_configuration = "OPTIONAL"
@@ -52,10 +53,10 @@ resource "aws_cognito_user_pool" "pool" {
 resource "aws_cognito_user_pool_client" "client" {
   name = "mirama-${var.environment}-client"
 
-  user_pool_id                  = aws_cognito_user_pool.pool.id
-  generate_secret               = false
-  refresh_token_validity        = 90
-  prevent_user_existence_errors = "ENABLED"
+  user_pool_id                         = aws_cognito_user_pool.pool.id
+  generate_secret                      = false
+  refresh_token_validity               = 90
+  prevent_user_existence_errors        = "ENABLED"
   allowed_oauth_flows_user_pool_client = true
 
   callback_urls = [
@@ -73,11 +74,13 @@ resource "aws_cognito_user_pool_client" "client" {
     "ALLOW_USER_PASSWORD_AUTH",
   ]
 
-  allowed_oauth_flows = ["code"]
-  allowed_oauth_scopes = ["openid", "email", "profile"]
-  supported_identity_providers = ["COGNITO"]
-}
 
+  allowed_oauth_flows          = ["code"]
+  allowed_oauth_scopes         = ["openid", "email", "profile"]
+  supported_identity_providers = ["COGNITO", "Google"]
+  depends_on                   = [aws_cognito_identity_provider.google]
+
+}
 resource "aws_cognito_user_pool_domain" "cognito-domain" {
   domain       = "mirama-prod"
   user_pool_id = aws_cognito_user_pool.pool.id
