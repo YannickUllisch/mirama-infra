@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white" alt="Terraform">
     <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS">
     <br />
-    <a href="https://github.com/YannickUllisch/mirama_infra"><strong>Infrastructure Docs</strong></a>
+    <strong>Infrastructure Docs</strong>
     <br />
     <a href="https://github.com/YannickUllisch/mirama-app">Mirama-App</a>
     &middot;
@@ -21,7 +21,8 @@
   <img src="assets/AWS_Diagram.png" alt="Mirama AWS Architecture" width="600">
 </div>
 
-
+<br />
+<br />
 
 <!-- TABLE OF CONTENTS -->
 
