@@ -8,6 +8,6 @@ module "ecs" {
   ecs_instance_profile_arn = data.terraform_remote_state.iam.outputs.ecs_instance_profile_arn
   ecs_exec_role_arn        = data.terraform_remote_state.iam.outputs.ecs_exec_role_arn
   ecs_task_role_arn        = data.terraform_remote_state.iam.outputs.ecs_task_role_arn
-  sub_domain               = "mirama"
+  sub_domain               = "mirama-ecs"
   domain_name              = "yannickullisch.com"
 }

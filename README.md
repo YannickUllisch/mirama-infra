@@ -107,7 +107,8 @@ To provision the Mirama infrastructure, you need to have [Terraform](https://www
 - [x] Modularize all core AWS resources
 - [x] Add event-driven messaging backbone
 - [x] Secure authentication with Cognito
-- [ ] Add monitoring/observability modules
+- [ ] Finish Lambda setup
+- [ ] Provision CodePipeline to automatically update ECS service on ECR update
 - [ ] Add CI/CD pipeline integration
 
 
