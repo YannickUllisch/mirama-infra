@@ -4,7 +4,7 @@ resource "aws_security_group" "rds_sg" {
 
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
-    description = "Ingress for debugging only, should be removed later"
+    description = "Ingress for debugging, should be removed later"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
@@ -17,16 +17,6 @@ resource "aws_security_group" "rds_sg" {
     to_port     = 5432
     protocol    = "tcp"
   }
-
-  /*
-  ingress {
-    security_groups = [ aws_security_group.ecs_sg.id ]
-    description = "only allow traffic from instances belong to ecs security group"
-    from_port = 5432
-    to_port = 5432
-    protocol = "tcp"
-  }
-  */
 
   egress {
     cidr_blocks = ["0.0.0.0/0"]
