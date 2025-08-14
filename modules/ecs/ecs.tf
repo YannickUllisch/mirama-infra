@@ -15,6 +15,14 @@ resource "aws_security_group" "ecs_sg" {
     security_groups = [aws_security_group.alb_sg.id]
   }
 
+  // Allow SSH Access for debugging
+  ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -31,6 +39,7 @@ resource "aws_launch_template" "ecs_lt" {
   name_prefix   = "mirama-ecs-${var.environment}-"
   image_id      = data.aws_ssm_parameter.ecs_node_ami.value
   instance_type = "t2.micro"
+  key_name      = "mirama-ecs-ssh-key"
 
   monitoring {
     enabled = true
@@ -114,6 +123,66 @@ resource "aws_ecs_task_definition" "mirama_app_task" {
         {
           name  = "RESEND_EMAIL_FROM"
           value = "onboarding@resend.dev"
+        },
+        {
+          name  = "NEXTAUTH_URL"
+          value = "https://mirama-ecs.yannickullisch.com"
+        },
+        {
+          name  = "NEXT_PUBLIC_BASE_URL"
+          value = "https://mirama-ecs.yannickullisch.com"
+        },
+        {
+          name  = "AWS_COGNITO_REGION"
+          value = "eu-west-1"
+        },
+        {
+          name  = "POSTGRES_PRISMA_URL"
+          value = var.POSTGRES_PRISMA_URL
+        },
+        {
+          name  = "POSTGRES_URL_NON_POOLING"
+          value = var.POSTGRES_URL_NON_POOLING
+        },
+        {
+          name  = "REDIS_URL"
+          value = var.REDIS_URL
+        },
+        {
+          name  = "NEXTAUTH_SECRET"
+          value = var.NEXTAUTH_SECRET
+        },
+        {
+          name  = "RESEND_API_KEY"
+          value = var.RESEND_API_KEY
+        },
+        {
+          name  = "AWS_SECRET_ACCESS_KEY"
+          value = var.AWS_SECRET_ACCESS_KEY
+        },
+        {
+          name  = "AWS_ACCESS_KEY_ID"
+          value = var.AWS_ACCESS_KEY_ID
+        },
+        {
+          name  = "NOTIFICATION_TOPIC_ARN"
+          value = var.NOTIFICATION_TOPIC_ARN
+        },
+        {
+          name  = "COGNITO_DOMAIN_URL"
+          value = var.COGNITO_DOMAIN_URL
+        },
+        {
+          name  = "COGNITO_CLIENT_ID"
+          value = var.COGNITO_CLIENT_ID
+        },
+        {
+          name  = "COGNITO_ISSUER"
+          value = var.COGNITO_ISSUER
+        },
+        {
+          name  = "COGNITO_USER_POOL_ID"
+          value = var.COGNITO_USER_POOL_ID
         }
       ]
 

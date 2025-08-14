@@ -6,13 +6,13 @@ resource "aws_iam_group" "developers" {
 resource "aws_iam_policy" "sns_publish" {
   name        = "mirama-sns-policy"
   description = "Allow publishing to SNS topics"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AllowSnsPublish"
-        Effect = "Allow"
-        Action = "sns:Publish"
+        Sid      = "AllowSnsPublish"
+        Effect   = "Allow"
+        Action   = "sns:Publish"
         Resource = "*"
       }
     ]

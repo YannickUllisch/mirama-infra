@@ -61,12 +61,15 @@ resource "aws_cognito_user_pool_client" "client" {
 
   callback_urls = [
     "https://${var.domain_url}/api/auth/callback/cognito",
-    "http://localhost:3000/api/auth/callback/cognito"
+    "http://localhost:3000/api/auth/callback/cognito",
+    "https://mirama-ecs.yannickullisch.com/api/auth/callback/cognito" // tmp since ecs runs on a different domain
   ]
 
   logout_urls = [
     "https://${var.domain_url}/api/auth/signout",
-    "http://localhost:3000/api/auth/signout"
+    "http://localhost:3000/api/auth/signout",
+    "https://mirama-ecs.yannickullisch.com/api/auth/signout"
+
   ]
 
   explicit_auth_flows = [
