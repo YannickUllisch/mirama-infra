@@ -12,19 +12,6 @@
 #   }
 # }
 
-data "archive_file" "go_lambda_zip" {
-  type        = "zip"
-  output_path = "${path.module}/lambda/build/function.zip"
-  source {
-    content  = <<-EOC
-      package main
-      import "context"
-      func main() {}
-    EOC
-    filename = "main.go"
-  }
-}
-
 resource "aws_lambda_function" "notification_lambda" {
   function_name    = "mirama-${var.environment}-notif-lambda"
   role             = aws_iam_role.lambda_role.arn
