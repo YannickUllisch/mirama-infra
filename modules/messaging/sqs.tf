@@ -22,7 +22,7 @@ resource "aws_sqs_queue_redrive_allow_policy" "terraform_queue_redrive_allow_pol
 }
 
 resource "aws_sns_topic_subscription" "notification_sqs_target" {
-  topic_arn = aws_sns_topic.notification_sns.arn
+  topic_arn = aws_sns_topic.main.arn
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.notification_sqs.arn
 }
@@ -43,7 +43,7 @@ resource "aws_sqs_queue_policy" "notification_sqs_policy" {
         Resource = aws_sqs_queue.notification_sqs.arn,
         Condition = {
           ArnEquals = {
-            "aws:SourceArn" = aws_sns_topic.notification_sns.arn
+            "aws:SourceArn" = aws_sns_topic.main.arn
           }
         }
       }
