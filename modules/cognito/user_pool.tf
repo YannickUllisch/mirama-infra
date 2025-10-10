@@ -14,9 +14,9 @@ resource "aws_cognito_user_pool" "pool" {
     require_symbols   = true
   }
 
-  // Don't allow public sign ups, we handle sign up logic in our app manually through the AWS API
+  // Allow public signins
   admin_create_user_config {
-    allow_admin_create_user_only = true
+    allow_admin_create_user_only = false
   }
 
   // MFA Setup
