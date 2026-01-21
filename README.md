@@ -18,7 +18,7 @@
     <a href="mailto:yannicku01@gmail.com">Contact</a>
   </p>
   <br />
-  <img src="assets/AWS_Diagram.png" alt="Mirama AWS Architecture" width="600">
+  <img src="assets/DeploymentFrontend.png" alt="Mirama (Next.js only) AWS Architecture" width="600">
 </div>
 
 <br />
